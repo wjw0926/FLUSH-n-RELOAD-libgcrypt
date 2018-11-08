@@ -1,16 +1,34 @@
 #!/bin/bash
 
-all: server client attack
+CC := gcc
+RM := rm
 
-server: server.c
-	gcc server.c -o server
+CFLAGS := `libgcrypt-config --cflags`
 
-client: client.c
-	gcc client.c -o client
+LIBS := `libgcrypt-config --libs`
 
-attack: flush_reload.c invept_reload.c
-	gcc flush_reload.c -o flush_reload
-	gcc invept_reload.c -o invept_reload
+OBJS := server.o gcry.o
+
+TARGET := server
+
+.PHONY: all clean
+
+all: $(TARGET)
+
+gcry.o: gcry.c
+	$(CC) -c gcry.c $(CFLAGS) -o gcry.o -I.
+
+server.o: server.c
+	$(CC) -c server.c $(CFLAGS) -o server.o -I.
+
+client.o: client.c
+	$(CC) -c client.c $(CFLAGS) -o client.o -I.
+
+client: client.o gcry.o
+	$(CC) -o client client.o gcry.o $(LIBS)
+
+$(TARGET): $(OBJS)
+	$(CC) -o $(TARGET) $(OBJS) $(LIBS)
 
 clean:
-	rm -rf server client flush_reload invept_reload
+	$(RM) -f $(OBJS) client.o

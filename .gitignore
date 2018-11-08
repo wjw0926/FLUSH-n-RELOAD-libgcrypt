@@ -1,5 +1,7 @@
 # Executables
+*.o
 server
 client
+gcry
 flush_reload
 invept_reload

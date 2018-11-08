@@ -7,6 +7,10 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 
+/* Libgcrypt */
+#include <gcrypt.h>
+#include "gcry.h"
+
 #define PORTNUM 3800
 #define MAXLINE 1024
 
@@ -33,6 +37,12 @@ int main(int argc, char * argv[]) {
     char str[MAXLINE];
     char buf[MAXLINE];
     
+    init_gcrypt();
+    if (!gcry_control (GCRYCTL_INITIALIZATION_FINISHED_P)) {
+        fputs ("libgcrypt has not been initialized\n", stderr);
+        abort ();
+    }
+
     while((opt = getopt(argc, argv, "hi:c:e:d:")) != -1) {
         switch(opt) {
             case 'h':
