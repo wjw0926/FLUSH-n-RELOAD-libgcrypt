@@ -10,18 +10,65 @@
 /* Libgcrypt */
 #include <gcrypt.h>
 #include "gcry.h"
+#include "common.h"
 
-#define PORTNUM 3800
-#define MAXLINE 1024
+int processRequest(int sockfd, gcry_sexp_t skey);
+int decryptString(int sockfd, char *str, gcry_sexp_t skey);
 
-#define ECHO 1
-#define ENCRYPT 2
-#define DECRYPT 3
+gcry_sexp_t keyGeneration() {
+    FILE* f;
+    void* rsa_buf;
+    gcry_error_t err = 0;
+    gcry_sexp_t params;
+    gcry_sexp_t keypair;
+    gcry_sexp_t skey;
 
-int processRequest(int sockfd);
-int echoString(int sockfd, char *str);
-int encryptString(int sockfd, char *str);
-int decryptString(int sockfd, char *str);
+    f = fopen("rsa.sp", "wb");
+    if (!f) {
+        fprintf(stderr, "fopen() failed\n");
+        exit(0);
+    }
+
+    err = gcry_sexp_build(&params, NULL, "(genkey (rsa (nbits 4:2048)))");
+    if (err) {
+        fprintf(stderr, "gcrypt: failed to create rsa params\n");
+        exit(0);
+    }
+
+    err = gcry_pk_genkey(&keypair, params);
+    if (err) {
+        fprintf(stderr, "gcrypt: failed to create rsa key pair\n");
+        exit(0);
+    }
+
+    printf("RSA key generation complete\n");
+    //gcry_sexp_dump(keypair);
+
+    skey = gcry_sexp_find_token(keypair, "private-key", 0);
+    //gcry_sexp_dump(skey);
+
+    rsa_buf = calloc(1, RSA_KEYPAIR_LEN);
+    if (!rsa_buf) {
+        fprintf(stderr, "malloc: could not allocate rsa buffer\n");
+        exit(0);
+    }
+
+    gcry_sexp_sprint(keypair, GCRYSEXP_FMT_CANON, rsa_buf, RSA_KEYPAIR_LEN);
+
+    if (fwrite(rsa_buf, RSA_KEYPAIR_LEN, 1, f) != 1) {
+        fprintf(stderr, "fwrite() failed\n");
+        exit(0);
+    }
+
+    /* Release contexts. */
+    gcry_sexp_release(keypair);
+    gcry_sexp_release(params);
+    gcry_sexp_release(skey);
+    free(rsa_buf);
+    fclose(f);
+
+    return skey;
+}
 
 int main(int argc, char * argv[]) {
     struct sockaddr_in addr = {0};
@@ -29,12 +76,15 @@ int main(int argc, char * argv[]) {
     int sockfd, cli_sockfd;
     socklen_t clilen = sizeof(cli_addr);
     int pid;
-    
+    gcry_sexp_t skey;
+
     init_gcrypt();
     if (!gcry_control (GCRYCTL_INITIALIZATION_FINISHED_P)) {
         fputs ("libgcrypt has not been initialized\n", stderr);
         abort ();
     }
+
+    skey = keyGeneration();
 
     if((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
         perror("socket error");
@@ -66,7 +116,7 @@ int main(int argc, char * argv[]) {
        pid = fork();
        
        if(pid == 0) {
-           processRequest(cli_sockfd);
+           processRequest(cli_sockfd, skey);
            close(cli_sockfd);
        }
        else{
@@ -76,41 +126,19 @@ int main(int argc, char * argv[]) {
     return 0;
 }
 
-int processRequest(int sockfd) {
+int processRequest(int sockfd, gcry_sexp_t skey) {
     char buf[MAXLINE];
-    int command = 0;
     char str[MAXLINE];
     int ret = 1;
 
     while(1)
     {
         if(recv(sockfd, buf, MAXLINE, 0) == -1) {
-               return -1;
-        }
-        command = atoi(buf);
- 
-        if(recv(sockfd, buf, MAXLINE, 0) == -1) {
             return -1;
         }
         strncpy(str, buf, MAXLINE);
  
-        printf("Received request: %d, %s\n", command, str);
- 
-        switch(command)
-        {
-           case ECHO:
-               echoString(sockfd, str);
-               break;
-           case ENCRYPT:
-               encryptString(sockfd, str);
-               break;
-           case DECRYPT:
-               decryptString(sockfd, str);
-               break;
-           default:
-               ret = -1;
-               break;
-        }
+        decryptString(sockfd, str, skey);
         break;
     }
     if (ret == -1) {
@@ -120,108 +148,60 @@ int processRequest(int sockfd) {
     return ret;
 }
 
-int echoString(int sockfd, char *str) {
-    char buf[MAXLINE];
-
-    memset(buf, 0, MAXLINE);
-    strncpy(buf, str, MAXLINE);
-
-    if(send(sockfd, buf, MAXLINE, 0) == -1) {
-        printf("Send echoString failed\n");
-        exit(0);
-    }
-    return 1;
-}
-
-int encryptString(int sockfd, char *str) {
+int decryptString(int sockfd, char *str, gcry_sexp_t skey) {
     char buf[MAXLINE];
     gcry_error_t err;
     gcry_mpi_t plain_mpi;
     gcry_mpi_t cipher_mpi;
     gcry_sexp_t plain;
     gcry_sexp_t cipher;
-    gcry_sexp_t pkey;
 
     memset(buf, 0, MAXLINE);
     strncpy(buf, str, MAXLINE);
 
-    err = gcry_mpi_scan(&plain_mpi, GCRYMPI_FMT_USG, buf, strlen((const char *) buf), NULL);
+    err = gcry_mpi_scan(&cipher_mpi, GCRYMPI_FMT_USG, buf, strlen((const char *) buf), NULL);
     if(err) {
-        fprintf(stderr, "failed to create a mpi from the message");
+        fprintf(stderr, "failed to create a mpi from the message\n");
         exit(1);
     }
-
-    err = gcry_sexp_build(&plain, NULL, "(data (flags raw) (value %m))", plain_mpi);
-    if(err) {
-        fprintf(stderr, "failed to create a sexp from the message");
-        exit(1);
-    }
-
-    /* Encrypt the PLAIN using the public key PKEY and store the result as
-       a newly created S-expression at CIPHER. */
-    err = gcry_pk_encrypt(&cipher, plain, pkey);
-    if(err) {
-        fprintf(stderr, "gcrypt: encryption failed");
-        exit(1);
-    }
-
-    cipher_mpi = gcry_sexp_nth_mpi(cipher, 0, GCRYMPI_FMT_USG);
+    printf("Cipher MPI: \n");
     gcry_mpi_dump(cipher_mpi);
+    printf("\n");
 
-    memset(buf, 0, MAXLINE);
-    err = gcry_mpi_print(GCRYMPI_FMT_USG, (unsigned char *) &buf, sizeof(buf), NULL, cipher_mpi);
-    if (err) {
-        fprintf(stderr, "failed to stringify mpi");
+    err = gcry_sexp_build(&cipher, NULL, "(enc-val (flags) (rsa (a %m)))", cipher_mpi);
+    if(err) {
+        fprintf(stderr, "failed to create a sexp from the message\n");
         exit(1);
     }
-    printf("-> %s\n", (char*) buf);
-
-    if(send(sockfd, buf, MAXLINE, 0) == -1) {
-        printf("Send encryptString failed\n");
-        exit(0);
-    }
-
-    /* Release contexts. */
-    gcry_mpi_release(plain_mpi);
-    gcry_mpi_release(cipher_mpi);
-    gcry_sexp_release(plain);
-    gcry_sexp_release(cipher);
-    gcry_sexp_release(pkey);
-
-    return 1;
-}
-
-int decryptString(int sockfd, char *str) {
-    char buf[MAXLINE];
-    gcry_error_t err;
-    gcry_mpi_t plain_mpi;
-    gcry_mpi_t cipher_mpi;
-    gcry_sexp_t plain;
-    gcry_sexp_t cipher;
-    gcry_sexp_t skey;
-
-    memset(buf, 0, MAXLINE);
-    strncpy(buf, str, MAXLINE);
+    gcry_sexp_dump(cipher);
 
     /* Decrypt the CIPHER using the private key SKEY and store the result as
        a newly created S-expression at PLAIN. */
     err = gcry_pk_decrypt(&plain, cipher, skey);
     if (err) {
-        fprintf(stderr, "gcrypt: decryption failed");
+        fprintf(stderr, "gcrypt decryption failed: %s\n", gcry_strsource(err));
         exit(1);
     }
+    gcry_sexp_dump(plain);
+
+    memset(buf, 0, MAXLINE);
+    err = gcry_mpi_print(GCRYMPI_FMT_USG, (unsigned char *) &buf, sizeof(buf), NULL, plain_mpi);
+    if (err) {
+        fprintf(stderr, "failed to stringify mpi\n");
+        exit(1);
+    }
+    printf("Plain: %s\n", (char*) buf);
 
     if(send(sockfd, buf, MAXLINE, 0) == -1) {
-        printf("Send decryptString failed\n");
+        printf("Send decrypted message failed\n");
         exit(0);
     }
 
     /* Release contexts. */
-    gcry_mpi_release(plain_mpi);
     gcry_mpi_release(cipher_mpi);
-    gcry_sexp_release(plain);
     gcry_sexp_release(cipher);
-    gcry_sexp_release(skey);
+    gcry_sexp_release(plain);
+    gcry_mpi_release(plain_mpi);
 
     return 1;
 }

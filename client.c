@@ -10,19 +10,13 @@
 /* Libgcrypt */
 #include <gcrypt.h>
 #include "gcry.h"
+#include "common.h"
 
-#define PORTNUM 3800
-#define MAXLINE 1024
-
-#define ECHO 1
-#define ENCRYPT 2
-#define DECRYPT 3
-
-int sendRequest(int sockfd, char *str, int command_type);
+int sendRequest(int sockfd, char *str);
 
 void help(char *progname)
 {
-    printf("Usage : %s -h -i [ip] -c [echo string] -e [encrypt string] -d [decrypt string]\n", progname);
+    printf("Usage : %s -h -i [ip] -m [msg]\n", progname);
 }
 
 int main(int argc, char * argv[]) {
@@ -30,7 +24,6 @@ int main(int argc, char * argv[]) {
     int sockfd;
     socklen_t servlen;
     
-    int command_type=0;
     int opt;
     int optflag=0;
     char ipaddr[36]={0x00,};
@@ -43,7 +36,7 @@ int main(int argc, char * argv[]) {
         abort ();
     }
 
-    while((opt = getopt(argc, argv, "hi:c:e:d:")) != -1) {
+    while((opt = getopt(argc, argv, "hi:m:")) != -1) {
         switch(opt) {
             case 'h':
                 help(argv[0]);
@@ -51,18 +44,7 @@ int main(int argc, char * argv[]) {
             case 'i':
                 sprintf(ipaddr, "%s", optarg);
                 break;
-            case 'c':
-                command_type = ECHO;
-                sprintf(str, "%s", optarg);
-                optflag = 1;
-                break;
-            case 'e':
-                command_type = ENCRYPT;
-                sprintf(str, "%s", optarg);
-                optflag = 1;
-                break;
-            case 'd':
-                command_type = DECRYPT;
+            case 'm':
                 sprintf(str, "%s", optarg);
                 optflag = 1;
                 break;
@@ -99,10 +81,14 @@ int main(int argc, char * argv[]) {
     
     while(1)
     {
-        sendRequest(sockfd, str, command_type);
+        if(sendRequest(sockfd, str) == -1) {
+            printf("Send message failed\n");
+            close(sockfd);
+            return -1;
+        }
 
         if(recv(sockfd, buf, MAXLINE, 0) == -1) {
-            printf("Recv string failed\n");
+            printf("Recv message failed\n");
             close(sockfd);
             return -1;
         }
@@ -113,24 +99,93 @@ int main(int argc, char * argv[]) {
     close(sockfd);
 }
 
-int sendRequest(int sockfd, char *str, int command_type)
-{
-    int sendn;
+int sendRequest(int sockfd, char *str) {
     char buf[MAXLINE];
+    FILE* f;
+    void* rsa_buf;
+    gcry_error_t err;
+    gcry_mpi_t plain_mpi;
+    gcry_mpi_t cipher_mpi;
+    gcry_sexp_t plain;
+    gcry_sexp_t cipher;
+    gcry_sexp_t keypair;
+    gcry_sexp_t pkey;
+    gcry_sexp_t data;
 
-    sprintf(buf, "%d", command_type);
-    if(send(sockfd, buf, MAXLINE, 0) == -1) {
-        printf("Send command failed\n");
-        close(sockfd);
+    f = fopen("rsa.sp", "rb");
+    if (!f) {
+        fprintf(stderr, "fopen() failed\n");
         return -1;
     }
 
-    sprintf(buf, "%s", str);
-    if(send(sockfd, buf, MAXLINE, 0) == -1) {
-        printf("Send string failed\n");
-        close(sockfd);
+    rsa_buf = calloc(1, RSA_KEYPAIR_LEN);
+    if (!rsa_buf) {
+        fprintf(stderr, "malloc: could not allocate rsa buffer\n");
         return -1;
     }
+    if (fread(rsa_buf, RSA_KEYPAIR_LEN, 1, f) != 1) {
+        fprintf(stderr, "fread() failed\n");
+        return -1;
+    }
+
+    err = gcry_sexp_new(&keypair, rsa_buf, RSA_KEYPAIR_LEN, 0);
+    pkey = gcry_sexp_find_token(keypair, "public-key", 0);
+
+    memset(buf, 0, MAXLINE);
+    strncpy(buf, str, MAXLINE);
+
+    err = gcry_mpi_scan(&plain_mpi, GCRYMPI_FMT_USG, buf, strlen((const char *) buf), NULL);
+    if(err) {
+        fprintf(stderr, "failed to create a mpi from the message\n");
+        return -1;
+    }
+
+    err = gcry_sexp_build(&plain, NULL, "(data (flags raw) (value %m))", plain_mpi);
+    if(err) {
+        fprintf(stderr, "failed to create a sexp from the message\n");
+        return -1;
+    }
+
+    /* Encrypt the PLAIN using the public key PKEY and store the result as
+       a newly created S-expression at CIPHER. */
+    err = gcry_pk_encrypt(&cipher, plain, pkey);
+    if(err) {
+        fprintf(stderr, "gcrypt encryption failed: %s\n", gcry_strsource(err));
+        return -1;
+    }
+    gcry_sexp_dump(cipher);
+
+    //data = gcry_sexp_car(gcry_sexp_nth(gcry_sexp_car(gcry_sexp_cdr(gcry_sexp_car(cipher))), 1));
+    //gcry_sexp_dump(data);
+    cipher_mpi = gcry_sexp_nth_mpi(gcry_sexp_car(gcry_sexp_nth(gcry_sexp_car(gcry_sexp_cdr(gcry_sexp_car(cipher))), 1)), 1, GCRYMPI_FMT_USG);
+    //cipher_mpi = gcry_sexp_nth_mpi(data, 1, GCRYMPI_FMT_USG);
+    printf("Cipher MPI: \n");
+    gcry_mpi_dump(cipher_mpi);
+    printf("\n");
+
+    memset(buf, 0, MAXLINE);
+    err = gcry_mpi_print(GCRYMPI_FMT_USG, (unsigned char *) &buf, sizeof(buf), NULL, cipher_mpi);
+    if(err) {
+        fprintf(stderr, "failed to stringify cipher mpi\n");
+        return -1;
+    }
+    //printf("Cipher: %s\n", (char *) buf);
+
+    if(send(sockfd, buf, MAXLINE, 0) == -1) {
+        printf("Send encrypted message failed\n");
+        return -1;
+    }
+
+    /* Release contexts. */
+    fclose(f);
+    free(rsa_buf);
+    gcry_sexp_release(keypair);
+    gcry_mpi_release(plain_mpi);
+    gcry_sexp_release(plain);
+    gcry_sexp_release(pkey);
+    gcry_sexp_release(cipher);
+    gcry_sexp_release(data);
+    gcry_mpi_release(cipher_mpi);
 
     return 1;
 }

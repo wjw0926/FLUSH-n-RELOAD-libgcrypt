@@ -31,4 +31,4 @@ $(TARGET): $(OBJS)
 	$(CC) -o $(TARGET) $(OBJS) $(LIBS)
 
 clean:
-	$(RM) -f $(OBJS) client.o
+	$(RM) -f $(TARGET) client $(OBJS) client.o rsa.sp
