@@ -110,8 +110,8 @@ int sendRequest(int sockfd, char *str) {
     gcry_sexp_t cipher;
     gcry_sexp_t keypair;
     gcry_sexp_t pkey;
-    gcry_sexp_t data;
 
+    // Load publid-key
     f = fopen("rsa.sp", "rb");
     if (!f) {
         fprintf(stderr, "fopen() failed\n");
@@ -131,8 +131,10 @@ int sendRequest(int sockfd, char *str) {
     err = gcry_sexp_new(&keypair, rsa_buf, RSA_KEYPAIR_LEN, 0);
     pkey = gcry_sexp_find_token(keypair, "public-key", 0);
 
+    // Client's input msg
     memset(buf, 0, MAXLINE);
     strncpy(buf, str, MAXLINE);
+    printf("Client input: %s\n", buf);
 
     err = gcry_mpi_scan(&plain_mpi, GCRYMPI_FMT_USG, buf, strlen((const char *) buf), NULL);
     if(err) {
@@ -153,25 +155,24 @@ int sendRequest(int sockfd, char *str) {
         fprintf(stderr, "gcrypt encryption failed: %s\n", gcry_strsource(err));
         return -1;
     }
-    gcry_sexp_dump(cipher);
+    gcry_sexp_dump(cipher); // Cipher is dumped correctly
 
-    //data = gcry_sexp_car(gcry_sexp_nth(gcry_sexp_car(gcry_sexp_cdr(gcry_sexp_car(cipher))), 1));
-    //gcry_sexp_dump(data);
-    cipher_mpi = gcry_sexp_nth_mpi(gcry_sexp_car(gcry_sexp_nth(gcry_sexp_car(gcry_sexp_cdr(gcry_sexp_car(cipher))), 1)), 1, GCRYMPI_FMT_USG);
-    //cipher_mpi = gcry_sexp_nth_mpi(data, 1, GCRYMPI_FMT_USG);
+    cipher_mpi = gcry_sexp_nth_mpi(gcry_sexp_car(gcry_sexp_nth(gcry_sexp_car(gcry_sexp_cdr(gcry_sexp_car(cipher))), 1)), 1, GCRYMPI_FMT_USG); // Find a-mpi in s-exp
     printf("Cipher MPI: \n");
-    gcry_mpi_dump(cipher_mpi);
+    gcry_mpi_dump(cipher_mpi); // Cipher mpi is dumped correctly
     printf("\n");
 
-    memset(buf, 0, MAXLINE);
-    err = gcry_mpi_print(GCRYMPI_FMT_USG, (unsigned char *) &buf, sizeof(buf), NULL, cipher_mpi);
+    unsigned char send_buf[MAXLINE];
+    memset(send_buf, 0, MAXLINE);
+    size_t nwritten = 0;
+    err = gcry_mpi_print(GCRYMPI_FMT_USG, (unsigned char *) &send_buf, sizeof(send_buf), &nwritten, cipher_mpi);
     if(err) {
         fprintf(stderr, "failed to stringify cipher mpi\n");
         return -1;
     }
-    //printf("Cipher: %s\n", (char *) buf);
+    printf("nwritten: %d\n", nwritten);
 
-    if(send(sockfd, buf, MAXLINE, 0) == -1) {
+    if(send(sockfd, (unsigned char *) send_buf, nwritten, 0) == -1) {
         printf("Send encrypted message failed\n");
         return -1;
     }
@@ -184,7 +185,6 @@ int sendRequest(int sockfd, char *str) {
     gcry_sexp_release(plain);
     gcry_sexp_release(pkey);
     gcry_sexp_release(cipher);
-    gcry_sexp_release(data);
     gcry_mpi_release(cipher_mpi);
 
     return 1;
