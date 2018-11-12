@@ -110,6 +110,7 @@ int sendRequest(int sockfd, char *str) {
     gcry_sexp_t cipher;
     gcry_sexp_t keypair;
     gcry_sexp_t pkey;
+    size_t nwritten = 0;
 
     // Load publid-key
     f = fopen("rsa.sp", "rb");
@@ -142,7 +143,7 @@ int sendRequest(int sockfd, char *str) {
         return -1;
     }
 
-    err = gcry_sexp_build(&plain, NULL, "(data (flags raw) (value %m))", plain_mpi);
+    err = gcry_sexp_build(&plain, NULL, "(data (flags raw) (value %M))", plain_mpi);
     if(err) {
         fprintf(stderr, "failed to create a sexp from the message\n");
         return -1;
@@ -155,24 +156,17 @@ int sendRequest(int sockfd, char *str) {
         fprintf(stderr, "gcrypt encryption failed: %s\n", gcry_strsource(err));
         return -1;
     }
-    gcry_sexp_dump(cipher); // Cipher is dumped correctly
 
-    cipher_mpi = gcry_sexp_nth_mpi(gcry_sexp_car(gcry_sexp_nth(gcry_sexp_car(gcry_sexp_cdr(gcry_sexp_car(cipher))), 1)), 1, GCRYMPI_FMT_USG); // Find a-mpi in s-exp
-    printf("Cipher MPI: \n");
-    gcry_mpi_dump(cipher_mpi); // Cipher mpi is dumped correctly
-    printf("\n");
+    cipher_mpi = gcry_sexp_nth_mpi(gcry_sexp_find_token(cipher, "a", 0), 1, GCRYMPI_FMT_USG);
 
-    unsigned char send_buf[MAXLINE];
-    memset(send_buf, 0, MAXLINE);
-    size_t nwritten = 0;
-    err = gcry_mpi_print(GCRYMPI_FMT_USG, (unsigned char *) &send_buf, sizeof(send_buf), &nwritten, cipher_mpi);
+    memset(buf, 0, MAXLINE);
+    err = gcry_mpi_print(GCRYMPI_FMT_USG, (unsigned char *) &buf, sizeof(buf), &nwritten, cipher_mpi);
     if(err) {
         fprintf(stderr, "failed to stringify cipher mpi\n");
         return -1;
     }
-    printf("nwritten: %d\n", nwritten);
 
-    if(send(sockfd, (unsigned char *) send_buf, nwritten, 0) == -1) {
+    if(send(sockfd, (unsigned char *) buf, nwritten, 0) == -1) {
         printf("Send encrypted message failed\n");
         return -1;
     }
