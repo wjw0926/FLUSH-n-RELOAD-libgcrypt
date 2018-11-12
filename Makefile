@@ -24,11 +24,17 @@ server.o: server.c
 client.o: client.c
 	$(CC) -c client.c $(CFLAGS) -o client.o -I.
 
+keygen.o: keygen.c
+	$(CC) -c keygen.c $(CFLAGS) -o keygen.o -I.
+
 client: client.o gcry.o
 	$(CC) -o client client.o gcry.o $(LIBS)
+
+keygen: keygen.o gcry.o
+	$(CC) -o keygen keygen.o gcry.o $(LIBS)
 
 $(TARGET): $(OBJS)
 	$(CC) -o $(TARGET) $(OBJS) $(LIBS)
 
 clean:
-	$(RM) -f $(TARGET) client $(OBJS) client.o rsa.sp
+	$(RM) -f $(TARGET) client keygen $(OBJS) client.o keygen.o rsa.sp

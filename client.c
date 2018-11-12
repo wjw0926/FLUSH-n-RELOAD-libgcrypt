@@ -112,27 +112,30 @@ int sendRequest(int sockfd, char *str) {
     gcry_sexp_t pkey;
     size_t nwritten = 0;
 
-    // Load publid-key
+    /* Load publid-key */
     f = fopen("rsa.sp", "rb");
-    if (!f) {
+    if(!f) {
         fprintf(stderr, "fopen() failed\n");
         return -1;
     }
 
     rsa_buf = calloc(1, RSA_KEYPAIR_LEN);
-    if (!rsa_buf) {
+    if(!rsa_buf) {
         fprintf(stderr, "malloc: could not allocate rsa buffer\n");
         return -1;
     }
-    if (fread(rsa_buf, RSA_KEYPAIR_LEN, 1, f) != 1) {
+    if(fread(rsa_buf, RSA_KEYPAIR_LEN, 1, f) != 1) {
         fprintf(stderr, "fread() failed\n");
         return -1;
     }
+    fclose(f);
 
     err = gcry_sexp_new(&keypair, rsa_buf, RSA_KEYPAIR_LEN, 0);
+    free(rsa_buf);
     pkey = gcry_sexp_find_token(keypair, "public-key", 0);
+    gcry_sexp_release(keypair);
 
-    // Client's input msg
+    /* Client's input msg */
     memset(buf, 0, MAXLINE);
     strncpy(buf, str, MAXLINE);
     printf("Client input: %s\n", buf);
@@ -172,14 +175,11 @@ int sendRequest(int sockfd, char *str) {
     }
 
     /* Release contexts. */
-    fclose(f);
-    free(rsa_buf);
-    gcry_sexp_release(keypair);
     gcry_mpi_release(plain_mpi);
-    gcry_sexp_release(plain);
-    gcry_sexp_release(pkey);
-    gcry_sexp_release(cipher);
     gcry_mpi_release(cipher_mpi);
+    gcry_sexp_release(plain);
+    gcry_sexp_release(cipher);
+    gcry_sexp_release(pkey);
 
     return 1;
 }
