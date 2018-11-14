@@ -37,9 +37,6 @@ int main(int argc, char* argv[]) {
                 memset(addr, 0, strlen(addr));
                 strncpy(addr, optarg, strlen(optarg));
                 break;
-            case '?':
-                fprintf(stderr, "Usage: %s [-a] [address...]\n", argv[0]);
-                return 0;
             default:
                 fprintf(stderr, "Usage: %s [-a] [address...]\n", argv[0]);
                 return 0;

@@ -7,13 +7,13 @@ CFLAGS := `libgcrypt-config --cflags`
 
 LIBS := `libgcrypt-config --libs`
 
-OBJS := server.o gcry.o
+OBJS := server.o client.o keygen.o gcry.o 
 
-TARGET := server
+TARGET := server client keygen gcry
 
 .PHONY: all clean
 
-all: $(TARGET)
+all: server client keygen
 
 gcry.o: gcry.c
 	$(CC) -c gcry.c $(CFLAGS) -o gcry.o -I.
@@ -27,14 +27,14 @@ client.o: client.c
 keygen.o: keygen.c
 	$(CC) -c keygen.c $(CFLAGS) -o keygen.o -I.
 
+server: server.o gcry.o
+	$(CC) -o server server.o gcry.o $(LIBS)
+
 client: client.o gcry.o
 	$(CC) -o client client.o gcry.o $(LIBS)
 
 keygen: keygen.o gcry.o
 	$(CC) -o keygen keygen.o gcry.o $(LIBS)
 
-$(TARGET): $(OBJS)
-	$(CC) -o $(TARGET) $(OBJS) $(LIBS)
-
 clean:
-	$(RM) -f $(TARGET) client keygen $(OBJS) client.o keygen.o rsa.sp
+	$(RM) -f $(TARGET) $(OBJS) rsa.sp
