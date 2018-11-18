@@ -3,8 +3,7 @@
 server
 client
 gcry
-flush_reload
-invept_reload
+keygen
 
 # RSA key pair
 rsa.sp
