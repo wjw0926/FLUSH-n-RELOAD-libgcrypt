@@ -56,4 +56,6 @@ server/server
 server/keygen
 server/rsa.sp
 client/client
+client/rsa.sp
+test/page_access
 *run.sh

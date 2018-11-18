@@ -28,4 +28,4 @@ keygen: keygen.o $(INCLUDE)/gcry.o
 	$(CC) -o keygen keygen.o $(INCLUDE)/gcry.o $(LIBS)
 
 clean:
-	$(RM) -f server keygen $(OBJS) rsa.sp
+	$(RM) -f server keygen $(OBJS)
