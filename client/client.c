@@ -71,7 +71,7 @@ int main(int argc, char * argv[]) {
     
     addr.sin_family     = AF_INET;
     addr.sin_port       = htons(PORTNUM);
-    addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+    addr.sin_addr.s_addr = inet_addr(ipaddr);
     
     servlen = sizeof(addr);
     if(connect(sockfd, (struct sockaddr *)&addr, servlen) == -1) {

@@ -1,3 +1,3 @@
-#define PORTNUM 3800
+#define PORTNUM 16384
 #define MAXLINE 1024
 #define RSA_KEYPAIR_LEN 2048

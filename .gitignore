@@ -52,8 +52,8 @@ Mkfile.old
 dkms.conf
 
 # User defined files
-server
-client
-gcry
-keygen
-rsa.sp
+server/server
+server/keygen
+server/rsa.sp
+client/client
+*run.sh
