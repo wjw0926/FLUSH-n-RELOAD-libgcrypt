@@ -160,7 +160,8 @@ int sendRequest(int sockfd, char *str) {
         return -1;
     }
 
-    cipher_mpi = gcry_sexp_nth_mpi(gcry_sexp_find_token(cipher, "a", 0), 1, GCRYMPI_FMT_USG);
+    //cipher_mpi = gcry_sexp_nth_mpi(gcry_sexp_find_token(cipher, "a", 0), 1, GCRYMPI_FMT_USG);
+    cipher_mpi = extract_a_from_sexp(cipher);
 
     memset(buf, 0, MAXLINE);
     err = gcry_mpi_print(GCRYMPI_FMT_USG, (unsigned char *) &buf, sizeof(buf), &nwritten, cipher_mpi);

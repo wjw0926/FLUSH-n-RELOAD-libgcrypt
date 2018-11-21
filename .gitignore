@@ -59,3 +59,4 @@ client/client
 client/rsa.sp
 test/page_access
 *run.sh
+*.txt
