@@ -66,7 +66,7 @@ int main(int argc, char * argv[]) {
 
     if((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
          printf("Socket error\n");
-         return 1;
+         return 0;
     }
     
     addr.sin_family     = AF_INET;
@@ -93,10 +93,11 @@ int main(int argc, char * argv[]) {
             return -1;
         }
         printf("Received: %s\n", buf);
-        
         break;
     }
     close(sockfd);
+
+    return 1;
 }
 
 int sendRequest(int sockfd, char *str) {
@@ -160,8 +161,7 @@ int sendRequest(int sockfd, char *str) {
         return -1;
     }
 
-    //cipher_mpi = gcry_sexp_nth_mpi(gcry_sexp_find_token(cipher, "a", 0), 1, GCRYMPI_FMT_USG);
-    cipher_mpi = extract_a_from_sexp(cipher);
+    cipher_mpi = gcry_sexp_nth_mpi(gcry_sexp_find_token(cipher, "a", 0), 1, GCRYMPI_FMT_USG);
 
     memset(buf, 0, MAXLINE);
     err = gcry_mpi_print(GCRYMPI_FMT_USG, (unsigned char *) &buf, sizeof(buf), &nwritten, cipher_mpi);

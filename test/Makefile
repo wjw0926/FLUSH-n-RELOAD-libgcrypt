@@ -2,6 +2,7 @@
 
 CC := gcc
 RM := rm
+CFLAGS := -Wall -g
 
 OBJS := attack.o asm.o
 
@@ -10,13 +11,13 @@ OBJS := attack.o asm.o
 all: attack
 
 asm.o: asm.c
-	$(CC) -c asm.c -o asm.o
+	$(CC) $(CFLAGS) -c asm.c -o asm.o
 
 attack.o: attack.c
-	$(CC) -c attack.c -o attack.o
+	$(CC) $(CFLAGS) -c attack.c -o attack.o
 
 attack: attack.o asm.o
-	$(CC) -o attack attack.o asm.o
+	$(CC) $(CFLAGS) -o attack attack.o asm.o
 
 clean:
 	$(RM) -f attack $(OBJS)

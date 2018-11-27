@@ -14,7 +14,6 @@ void access_data(char *addr) {
     __asm__ __volatile__ (
         " mfence                \n"
         " lfence                \n"
-        /* Load the 4 bytes from the memory address in ECX into EAX */
         " movl (%0), %%eax      \n"
         :
         : "c" (addr)
@@ -43,11 +42,11 @@ unsigned long probe(char *addr) {
         " rdtsc                 \n"
         " lfence                \n"
         " movl %%eax, %%esi     \n"
-        /* Load the 4 bytes from the memory address in ECX into EAX */
         " movl (%1), %%eax      \n"
         " lfence                \n"
         " rdtsc                 \n"
         " subl %%esi, %%eax     \n"
+        " clflush 0(%1)         \n"
         : "=a" (time)
         : "c" (addr)
         : "%esi", "%edx");

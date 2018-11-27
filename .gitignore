@@ -58,5 +58,6 @@ server/rsa.sp
 client/client
 client/rsa.sp
 test/page_access
+test/attack
 *run.sh
 *.txt

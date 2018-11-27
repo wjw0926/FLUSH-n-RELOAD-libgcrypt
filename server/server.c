@@ -114,7 +114,6 @@ int main(int argc, char *argv[]) {
     int sockfd, cli_sockfd;
     socklen_t clilen = sizeof(cli_addr);
     int pid;
-    gcry_sexp_t skey;
 
     init_gcrypt();
     if (!gcry_control (GCRYCTL_INITIALIZATION_FINISHED_P)) {
@@ -149,15 +148,8 @@ int main(int argc, char *argv[]) {
        if(cli_sockfd < 0) {
            exit(0);
        }
-       pid = fork();
-       
-       if(pid == 0) {
-           processRequest(cli_sockfd);
-           close(cli_sockfd);
-       }
-       else{
-           close(cli_sockfd);
-       }
+       processRequest(cli_sockfd);
+       close(cli_sockfd);
     }
     return 0;
 }

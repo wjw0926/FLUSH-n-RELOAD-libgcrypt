@@ -9,4 +9,4 @@ void access_data(char *addr);
 void flush_data(char *addr);
 
 /* Measure the time to reload the data at a memory address */
-unsigned long reload(char *addr);
+unsigned long probe(char *addr);

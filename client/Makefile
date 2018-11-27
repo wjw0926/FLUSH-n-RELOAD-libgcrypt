@@ -3,7 +3,7 @@
 CC := gcc
 RM := rm
 
-CFLAGS := `libgcrypt-config --cflags`
+CFLAGS := -Wall `libgcrypt-config --cflags`
 
 LIBS := `libgcrypt-config --libs`
 

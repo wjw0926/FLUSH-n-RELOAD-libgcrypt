@@ -7,7 +7,6 @@ int main(int argc, char *argv[]) {
     gcry_error_t err = 0;
     gcry_sexp_t params;
     gcry_sexp_t keypair;
-    gcry_sexp_t skey;
 
     init_gcrypt();
     if (!gcry_control (GCRYCTL_INITIALIZATION_FINISHED_P)) {
