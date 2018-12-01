@@ -23,19 +23,20 @@ int main(int argc, char * argv[]) {
     struct sockaddr_in addr={0};
     int sockfd;
     socklen_t servlen;
-    
     int opt;
     int optflag=0;
     char ipaddr[36]={0x00,};
     char str[MAXLINE];
     char buf[MAXLINE];
-    
+
+    /* Initialize libgcrypt */
     init_gcrypt();
     if (!gcry_control (GCRYCTL_INITIALIZATION_FINISHED_P)) {
         fputs ("libgcrypt has not been initialized\n", stderr);
         abort ();
     }
 
+    /* Argument parsing */
     while((opt = getopt(argc, argv, "hi:m:")) != -1) {
         switch(opt) {
             case 'h':
@@ -53,22 +54,21 @@ int main(int argc, char * argv[]) {
                 return 1;
         }
     }
-    
     if(ipaddr[0] == '\0') {
         printf ("ip address not setting\n");
         return 0;
     }
-    
     if((str[0] == '\0') && (optflag == 1)) {
         printf ("string error\n");
         return 0;
     }
 
+    /* Socket communication  */
     if((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
          printf("Socket error\n");
          return 0;
     }
-    
+
     addr.sin_family     = AF_INET;
     addr.sin_port       = htons(PORTNUM);
     addr.sin_addr.s_addr = inet_addr(ipaddr);

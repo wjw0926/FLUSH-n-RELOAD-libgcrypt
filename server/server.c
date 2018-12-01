@@ -113,7 +113,6 @@ int main(int argc, char *argv[]) {
     struct sockaddr cli_addr = {0};
     int sockfd, cli_sockfd;
     socklen_t clilen = sizeof(cli_addr);
-    int pid;
 
     init_gcrypt();
     if (!gcry_control (GCRYCTL_INITIALIZATION_FINISHED_P)) {

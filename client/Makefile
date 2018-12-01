@@ -9,13 +9,11 @@ LIBS := `libgcrypt-config --libs`
 
 OBJS := client.o
 
-TARGET := client
-
 INCLUDE := ../include
 
 .PHONY: all clean
 
-all: $(TARGET)
+all: client attack
 
 client.o: client.c
 	$(CC) -c client.c $(CFLAGS) -o client.o -I$(INCLUDE)
@@ -23,5 +21,8 @@ client.o: client.c
 client: client.o $(INCLUDE)/gcry.o
 	$(CC) -o client client.o $(INCLUDE)/gcry.o $(LIBS)
 
+attack: attack.c
+	$(CC) attack.c -Wall -g -o attack
+
 clean:
-	$(RM) -f $(TARGET) $(OBJS)
+	$(RM) -f client attack $(OBJS)
