@@ -3,6 +3,8 @@
 CC := gcc
 RM := rm
 
+DEFAULT := $(HOME)/INV-RELOAD
+
 LIBDIR := /usr/local/lib
 
 CFLAGS := -Wall `libgcrypt-config --cflags`
@@ -11,7 +13,7 @@ LIBS := `libgcrypt-config --libs`
 
 OBJS := client.o
 
-INCLUDE := ../include
+INCLUDE := $(DEFAULT)/include
 
 .PHONY: all clean
 

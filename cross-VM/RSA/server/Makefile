@@ -5,13 +5,15 @@ RM := rm
 
 LIBDIR := /usr/local/lib
 
+DEFAULT := $(HOME)/INV-RELOAD
+
 CFLAGS := -Wall `libgcrypt-config --cflags`
 
 LIBS := `libgcrypt-config --libs`
 
 OBJS := server.o keygen.o
 
-INCLUDE := ../include
+INCLUDE := $(DEFAULT)/include
 
 .PHONY: all clean
 
