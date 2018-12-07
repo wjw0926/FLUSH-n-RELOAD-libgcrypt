@@ -58,5 +58,5 @@ server/rsa.sp
 client/client
 client/attack
 client/rsa.sp
-*run.sh
+*/run.sh
 *.txt

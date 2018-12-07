@@ -1,6 +1,6 @@
 #include "gcry.h"
 
-void init_gcrypt() {
+void init_gcrypt_secure() {
     /* Version check should be the very first call because it
        makes sure that important subsystems are initialized. */
     if (!gcry_check_version (GCRYPT_VERSION)) {
@@ -27,6 +27,24 @@ void init_gcrypt() {
     /* It is now okay to let Libgcrypt complain when there was/is
        a problem with the secure memory. */
     gcry_control (GCRYCTL_RESUME_SECMEM_WARN);
+
+    /* ... If required, other initialization goes here.  */
+
+    /* Tell Libgcrypt that initialization has completed. */
+    gcry_control (GCRYCTL_INITIALIZATION_FINISHED, 0);
+}
+
+void init_gcrypt() {
+    /* Version check should be the very first call because it
+       makes sure that important subsystems are initialized. */
+    if (!gcry_check_version (GCRYPT_VERSION))
+    {
+        fputs ("libgcrypt version mismatch\n", stderr);
+        exit (2);
+    }
+
+    /* Disable secure memory.  */
+    gcry_control (GCRYCTL_DISABLE_SECMEM, 0);
 
     /* ... If required, other initialization goes here.  */
 

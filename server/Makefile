@@ -3,6 +3,8 @@
 CC := gcc
 RM := rm
 
+LIBDIR := /usr/local/lib
+
 CFLAGS := -Wall `libgcrypt-config --cflags`
 
 LIBS := `libgcrypt-config --libs`
@@ -22,10 +24,10 @@ keygen.o: keygen.c
 	$(CC) -c keygen.c $(CFLAGS) -o keygen.o -I$(INCLUDE)
 
 server: server.o $(INCLUDE)/gcry.o
-	$(CC) -o server server.o $(INCLUDE)/gcry.o $(LIBS)
+	$(CC) -o server server.o $(INCLUDE)/gcry.o $(LIBS) -L$(LIBDIR)
 
 keygen: keygen.o $(INCLUDE)/gcry.o
-	$(CC) -o keygen keygen.o $(INCLUDE)/gcry.o $(LIBS)
+	$(CC) -o keygen keygen.o $(INCLUDE)/gcry.o $(LIBS) -L$(LIBDIR)
 
 clean:
 	$(RM) -f server keygen $(OBJS)
