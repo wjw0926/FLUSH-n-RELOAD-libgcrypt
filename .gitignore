@@ -63,5 +63,5 @@ cross-VM/*/client/client
 cross-VM/*/client/attack
 cross-VM/*/client/result-*.txt
 cross-VM/RSA/*/rsa.sp
-cross-VM/EdDSA/*/eddsa.sexp
+cross-VM/EdDSA/*/ecc.sp
 *run.sh
