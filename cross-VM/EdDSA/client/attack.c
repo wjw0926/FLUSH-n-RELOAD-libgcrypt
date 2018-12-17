@@ -4,7 +4,7 @@
 #include <sys/mman.h>
 #include <fcntl.h>
 
-int NUM_ADDRS = 5;
+int NUM_ADDRS = 2;
 int NUM_SLOTS = 20000;
 size_t LIBGCRYPT_SIZE = 3145728;
 

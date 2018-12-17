@@ -114,7 +114,7 @@ int main(int argc, char *argv[]) {
     int sockfd, cli_sockfd;
     socklen_t clilen = sizeof(cli_addr);
 
-    init_gcrypt();
+    init_gcrypt_secure();
     if (!gcry_control (GCRYCTL_INITIALIZATION_FINISHED_P)) {
         fputs ("libgcrypt has not been initialized\n", stderr);
         abort ();

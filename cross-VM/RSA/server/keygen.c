@@ -8,7 +8,7 @@ int main(int argc, char *argv[]) {
     gcry_sexp_t params;
     gcry_sexp_t keypair;
 
-    init_gcrypt();
+    init_gcrypt_secure();
     if (!gcry_control (GCRYCTL_INITIALIZATION_FINISHED_P)) {
         fputs ("libgcrypt has not been initialized\n", stderr);
         abort ();

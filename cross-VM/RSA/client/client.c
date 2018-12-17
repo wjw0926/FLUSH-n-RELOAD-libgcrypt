@@ -30,7 +30,7 @@ int main(int argc, char * argv[]) {
     char buf[MAXLINE];
 
     /* Initialize libgcrypt */
-    init_gcrypt();
+    init_gcrypt_secure();
     if (!gcry_control (GCRYCTL_INITIALIZATION_FINISHED_P)) {
         fputs ("libgcrypt has not been initialized\n", stderr);
         abort ();

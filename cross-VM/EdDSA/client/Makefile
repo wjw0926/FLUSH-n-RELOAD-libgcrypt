@@ -3,17 +3,15 @@
 CC := gcc
 RM := rm
 
-DEFAULT := $(HOME)/INV-RELOAD
-
 LIBDIR := /usr/local/lib
+
+INCLUDE := $(HOME)/INV-RELOAD/include
 
 CFLAGS := -Wall `libgcrypt-config --cflags`
 
 LIBS := `libgcrypt-config --libs`
 
 OBJS := client.o
-
-INCLUDE := $(DEFAULT)/include
 
 .PHONY: all clean
 
@@ -26,7 +24,7 @@ client: client.o $(INCLUDE)/gcry.o
 	$(CC) -o client client.o $(INCLUDE)/gcry.o $(LIBS) -L$(LIBDIR)
 
 attack: attack.c
-	$(CC) attack.c -Wall -g -o attack
+	$(CC) attack.c -Wall -o attack
 
 clean:
 	$(RM) -f client attack $(OBJS)
