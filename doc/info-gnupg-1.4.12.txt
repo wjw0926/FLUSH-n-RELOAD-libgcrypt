@@ -1,0 +1,18 @@
+map ~/gnupg-1.4.12/bin/gpg
+base 0x40918c
+
+.text VMA 0x4030d0 File off 0x0030d0
+=> offset 0x400000
+
+0x48fb20 <mpih_sqr_n_basecase>
+0x48fc30 <mpih_sqr_n>
+0x48eac0 <mpihelp_divrem>
+0x4900e0 <mpihelp_mul>
+0x490260 <mpihelp_mul_karatsuba_case>
+
+// Near the retq of each function
+0x48fbc0
+0x48fca9
+0x48ed80
+0x4901f4
+0x490501
