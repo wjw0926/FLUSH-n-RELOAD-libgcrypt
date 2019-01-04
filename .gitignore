@@ -62,4 +62,6 @@ cross-VM/*/client/attack
 cross-VM/*/client/result-*.txt
 cross-VM/RSA/*/rsa.sp
 cross-VM/EdDSA/*/ecc.sp
+cross-VM/EdDSA/*/run.sh
 doc/dump-*.txt
+doc/*-libgcrypt-1.8.4.txt
