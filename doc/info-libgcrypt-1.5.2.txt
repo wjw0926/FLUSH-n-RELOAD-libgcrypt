@@ -1,0 +1,20 @@
+map /usr/local/lib/libgcrypt.so.11
+base 0x0000000000007d00
+
+// Start offsets
+520d0 <_gcry_mpih_sqr_n>
+51fc0 <_gcry_mpih_sqr_n_basecase>
+50e10 <_gcry_mpih_divrem>
+52790 <_gcry_mpih_mul_karatsuba_case>
+52610 <_gcry_mpih_mul>
+51ac0 <mul_n>
+519a0 <mul_n_basecase>
+
+// Near retq
+5214a <_gcry_mpih_sqr_n>
+52060 <_gcry_mpih_sqr_n_basecase>
+510d0 51324 5156d <_gcry_mpih_divrem>
+52a41 <_gcry_mpih_mul_karatsuba_case>
+52725 <_gcry_mpih_mul>
+51b50 <mul_n>
+51a48 <mul_n_basecase>
