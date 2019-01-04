@@ -16,7 +16,5 @@ sleep 0.001
 ./client -i 127.0.0.1 &
 CLIENT_PID=$!
 
-trap "kill -TERM ${ATTACK_PID} ${CLIENT_PID}" INT QUIT
-
 wait ${ATTACK_PID}
 wait ${CLIENT_PID}

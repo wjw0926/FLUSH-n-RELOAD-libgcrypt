@@ -5,8 +5,8 @@
 #include <fcntl.h>
 
 int NUM_ADDRS = 7;
-int NUM_SLOTS = 50000;
-size_t LIBGCRYPT_SIZE = 1572864;
+int NUM_SLOTS = 20000;
+size_t LIBGCRYPT_SIZE = 2621440;
 
 /* Busy wait for a given cycle */
 void busy_wait(int cycle) {
