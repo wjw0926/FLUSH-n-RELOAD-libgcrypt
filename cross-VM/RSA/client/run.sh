@@ -5,7 +5,7 @@ make
 ./encrypt -m encrypt_send_seperately
 
 LIBGCRYPT=/usr/local/lib/libgcrypt.so.11.8.1
-OFFSET=${HOME}/INV-RELOAD/doc/offset-libgcrypt-1.5.2.txt
+OFFSET=${HOME}/INV-RELOAD/offsets/offset-libgcrypt-1.5.2.txt
 CYCLE=$1
 
 ./attack ${LIBGCRYPT} ${OFFSET} ${CYCLE} &

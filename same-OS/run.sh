@@ -4,7 +4,7 @@ make clean
 make
 
 GnuPG=${HOME}/gnupg-1.4.12/bin/gpg
-OFFSET=${HOME}/INV-RELOAD/doc/offset-gnupg-1.4.12.txt
+OFFSET=${HOME}/INV-RELOAD/offsets/offset-gnupg-1.4.12.txt
 CYCLE=$1
 
 ./attack ${GnuPG} ${OFFSET} ${CYCLE} &
