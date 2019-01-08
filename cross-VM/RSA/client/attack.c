@@ -4,9 +4,9 @@
 #include <sys/mman.h>
 #include <fcntl.h>
 
-int NUM_ADDRS = 5;
+int NUM_ADDRS = 7;
 int NUM_SLOTS = 20000;
-size_t LIBGCRYPT_SIZE = 3145728;
+size_t LIBGCRYPT_SIZE = 2621440;
 
 /* Busy wait for a given cycle */
 void busy_wait(int cycle) {
@@ -75,22 +75,18 @@ int main(int argc, char *argv[]) {
         return -1;
     }
     cycles = atoi(argv[3]);
-    printf("Time slot: %d cycles\n", cycles);
 
     /* MMAP libgcyrpt to acheive sharing through page deduplication */
-    void *libgcrypt_ptr = mmap(NULL, LIBGCRYPT_SIZE, PROT_READ, MAP_FILE | MAP_SHARED, fd, 0);
+    void *libgcrypt_ptr = mmap(NULL, LIBGCRYPT_SIZE, PROT_READ, MAP_SHARED, fd, 0);
     if(libgcrypt_ptr == MAP_FAILED) {
         fprintf(stderr, "MMAP failed\n");
         return -1;
     }
-    printf("libgcrypt is mapped to %p\n", libgcrypt_ptr);
 
     for(i = 0; i < NUM_ADDRS; i++) {
         getline(&line, &len, f);
         line[strlen(line) - 1] = '\0';
-        printf("%s\n", line);
         target_addrs[i] = (char *) ((unsigned long) libgcrypt_ptr + strtol(line, &endptr, 16));
-        printf("%p\n", target_addrs[i]);
     }
     free(line);
 

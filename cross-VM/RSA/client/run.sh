@@ -2,10 +2,10 @@
 
 make clean
 make
+./encrypt -m encrypt_send_seperately
 
-DEFAULT=${HOME}/INV-RELOAD
-LIBGCRYPT=/usr/local/lib/libgcrypt.so.11
-OFFSET=${DEFAULT}/doc/offset-libgcrypt-1.5.2.txt
+LIBGCRYPT=/usr/local/lib/libgcrypt.so.11.8.1
+OFFSET=${HOME}/INV-RELOAD/doc/offset-libgcrypt-1.5.2.txt
 CYCLE=$1
 
 ./attack ${LIBGCRYPT} ${OFFSET} ${CYCLE} &
@@ -13,7 +13,7 @@ ATTACK_PID=$!
 
 sleep 0.001
 
-./client -i 127.0.0.1 -m sample_message
+./client -i 127.0.0.1 &
 CLIENT_PID=$!
 
 wait ${ATTACK_PID}

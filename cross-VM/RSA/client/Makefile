@@ -3,30 +3,29 @@
 CC := gcc
 RM := rm
 
-DEFAULT := $(HOME)/INV-RELOAD
-
 LIBDIR := /usr/local/lib
 
 CFLAGS := -Wall `libgcrypt-config --cflags`
 
 LIBS := `libgcrypt-config --libs`
 
-OBJS := client.o
-
-INCLUDE := $(DEFAULT)/include
+INCLUDE := $(HOME)/INV-RELOAD/include
 
 .PHONY: all clean
 
-all: client attack
+all: encrypt client attack
 
-client.o: client.c
-	$(CC) -c client.c $(CFLAGS) -o client.o -I$(INCLUDE)
+encrypt.o: encrypt.c
+	$(CC) -c encrypt.c $(CFLAGS) -o encrypt.o -I$(INCLUDE)
 
-client: client.o $(INCLUDE)/gcry.o
-	$(CC) -o client client.o $(INCLUDE)/gcry.o $(LIBS) -L$(LIBDIR)
+encrypt: encrypt.o $(INCLUDE)/gcry.o
+	$(CC) -o encrypt encrypt.o $(INCLUDE)/gcry.o $(LIBS) -L$(LIBDIR)
+
+client: client.c
+	$(CC) client.c -Wall -o client -I$(INCLUDE)
 
 attack: attack.c
-	$(CC) attack.c -Wall -g -o attack
+	$(CC) attack.c -Wall -o attack
 
 clean:
-	$(RM) -f client attack $(OBJS)
+	$(RM) -f encrypt client attack encrypt.o cipher.txt
