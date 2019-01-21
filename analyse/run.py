@@ -19,15 +19,13 @@ for i in range(1, 1001):
 
 Average = float(sum(rate_list)) / 1000
 Median = median(rate_list)
-Min = min(rate_list)
 Max = max(rate_list)
 
 f= open("recover_rate.txt", "w+")
 
-f.write('Average recover rate is %.2f%%' % (Average*100))
-f.write('Median recover rate is %.2f%%' % (Median*100))
-f.write('Minimum recover rate is %.2f%%' % (Min*100))
-f.write('Maximum recover rate is %.2f%%' % (Max*100))
+f.write('Average recover rate is %.2f%%\n' % (Average*100))
+f.write('Median recover rate is %.2f%%\n' % (Median*100))
+f.write('Maximum recover rate is %.2f%%\n' % (Max*100))
 
 for i in range(1000):
     f.write("%.4f\n" % rate_list[i])

@@ -60,6 +60,7 @@ int main(int argc, char *argv[]) {
     char *target_addrs[NUM_ADDRS];
     unsigned long results[NUM_SLOTS][NUM_ADDRS];
     int cycles;
+    int count;
 
     /* Argument parsing */
     if(argc != 5) {

