@@ -100,7 +100,7 @@ int main(int argc, char *argv[]) {
 
     /* Write results to result.txt */
     char filename[64];
-    sprintf(filename, "result-%d-%d.txt", cycles, count);
+    sprintf(filename, "results/result-%d-%d.txt", cycles, count);
     f = fopen(filename, "w");
     for(i = 0; i < NUM_SLOTS; i++) {
         for(j = 0; j < NUM_ADDRS; j++) {

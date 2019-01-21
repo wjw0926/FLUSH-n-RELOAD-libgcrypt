@@ -60,7 +60,7 @@ cross-VM/*/server/keygen
 cross-VM/*/client/encrypt
 cross-VM/*/client/client
 cross-VM/*/client/attack
-cross-VM/*/client/result-*.txt
+cross-VM/*/client/results/
 cross-VM/*/client/cipher.txt
 cross-VM/RSA/*/rsa.sp
 cross-VM/EdDSA/*/ecc.sp
