@@ -65,3 +65,5 @@ cross-VM/*/client/cipher.txt
 cross-VM/RSA/*/rsa.sp
 cross-VM/EdDSA/*/ecc.sp
 offsets/dump-*.txt
+analyse/rsa_L1.sp
+analyse/rsa_L2.sp
