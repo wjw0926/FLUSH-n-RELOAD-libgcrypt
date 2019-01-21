@@ -4,8 +4,8 @@
 #include <sys/mman.h>
 #include <fcntl.h>
 
-int NUM_ADDRS = 7;
-int NUM_SLOTS = 20000;
+int NUM_ADDRS = 3;
+int NUM_SLOTS = 50000;
 size_t LIBGCRYPT_SIZE = 2621440;
 
 /* Busy wait for a given cycle */
@@ -62,8 +62,8 @@ int main(int argc, char *argv[]) {
     int cycles;
 
     /* Argument parsing */
-    if(argc != 4) {
-        fprintf(stderr, "Usage: %s libgcrypt_path target_offsets cycles\n", argv[0]);
+    if(argc != 5) {
+        fprintf(stderr, "Usage: %s libgcrypt_path target_offsets cycles count\n", argv[0]);
         return -1;
     }
     if((fd = open(argv[1], O_RDONLY)) == -1) {
@@ -75,6 +75,7 @@ int main(int argc, char *argv[]) {
         return -1;
     }
     cycles = atoi(argv[3]);
+    count = atoi(argv[4]);
 
     /* MMAP libgcyrpt to acheive sharing through page deduplication */
     void *libgcrypt_ptr = mmap(NULL, LIBGCRYPT_SIZE, PROT_READ, MAP_SHARED, fd, 0);
@@ -99,7 +100,7 @@ int main(int argc, char *argv[]) {
 
     /* Write results to result.txt */
     char filename[64];
-    sprintf(filename, "result-%d.txt", cycles);
+    sprintf(filename, "result-%d-%d.txt", cycles, count);
     f = fopen(filename, "w");
     for(i = 0; i < NUM_SLOTS; i++) {
         for(j = 0; j < NUM_ADDRS; j++) {
