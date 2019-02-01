@@ -7,7 +7,7 @@ def ground_truth(inputfile):
         q_index = content.find('q129:')
         if inputfile == 'rsa_L1.sp':
             u_index = content.find('u129:')
-        elif inputfile == 'rsa_L2.sp':
+        elif inputfile == 'rsa_L2.sp' or inputfile == 'rsa_L0.sp':
             u_index = content.find('u128:')
 
         d = 0

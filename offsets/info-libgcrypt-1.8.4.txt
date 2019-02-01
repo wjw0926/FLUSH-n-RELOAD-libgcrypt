@@ -1,0 +1,15 @@
+map /usr/local/lib/libgcrypt.so.20
+base 0x000000000000bb00
+
+0x11a50c <_gcry_mpi_ec_dup_point>
+0x11b1dc <_gcry_mpi_ec_add_points>
+
+119e62 <dup_point_weierstrass>
+11a269 <dup_point_montgomery>
+11a29c <dup_point_edwards>
+11a582 retq
+
+11a583 <add_points_weierstrass>
+11abe9 <add_points_montgomery>
+11ac20 <add_points_edwards>
+11b259 retq
