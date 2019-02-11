@@ -1,14 +1,10 @@
-# Get ground truth
 def ground_truth(inputfile):
     with open(inputfile, mode='rb') as binary:
         content = binary.read()
         d_index = content.find('d256:')
         p_index = content.find('p129:')
         q_index = content.find('q129:')
-        if inputfile == 'rsa_L1.sp':
-            u_index = content.find('u129:')
-        elif inputfile == 'rsa_L2.sp' or inputfile == 'rsa_L0.sp':
-            u_index = content.find('u128:')
+        u_index = content.find('u128:')
 
         d = 0
         p = 0
@@ -30,6 +26,6 @@ def ground_truth(inputfile):
         d_q = d % (q-1)
 
         ground_truth = str(bin(d_p))[2:] + str(bin(d_q)[2:])
-        #print ('Ground truth is ' + str(len(ground_truth)) + '-bit long')
+        print ('Ground truth is ' + str(len(ground_truth)) + '-bit long')
 
     return ground_truth

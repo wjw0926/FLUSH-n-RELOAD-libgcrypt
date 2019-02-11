@@ -107,6 +107,6 @@ def translate(inputfile):
         cnt = cnt + 1
 
     recovered = ''.join(result)
-    #print ('Recovered secret is ' + str(len(recovered)) + '-bit long')
+    print ('Recovered secret is ' + str(len(recovered)) + '-bit long')
 
     return recovered

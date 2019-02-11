@@ -52,17 +52,16 @@ Mkfile.old
 dkms.conf
 
 # User defined files
-same-OS/attack
-same-OS/text.txt.gpg
-same-OS/result-*.txt
-cross-VM/*/server/server
-cross-VM/*/server/keygen
-cross-VM/*/client/encrypt
-cross-VM/*/client/client
-cross-VM/*/client/attack
-cross-VM/*/client/results/
-cross-VM/*/client/cipher.txt
-cross-VM/RSA/*/rsa.sp
-cross-VM/EdDSA/*/ecc.sp
-offsets/dump-*.txt
+GnuPG/attack
+GnuPG/text.txt.gpg
+GnuPG/result-*.txt
+*/server/server
+*/server/keygen
+*/client/encrypt
+*/client/client
+*/client/attack
+*/client/results/
+*/client/cipher.txt
+RSA/*/rsa.sp
+EdDSA/*/ecc.sp
 analyse/rsa_L*.sp

@@ -9,7 +9,7 @@ rate_list = []
 ground_truth = ground_truth('rsa_'+sys.argv[1]+'.sp')
 
 for i in range(1, 1001):
-    inputfile = os.path.join('../cross-VM/RSA/client/results/', 'result-'+sys.argv[2]+'-'+str(i)+'.txt')
+    inputfile = os.path.join('../RSA/client/results/', 'result-'+sys.argv[2]+'-'+str(i)+'.txt')
     recovered = translate(inputfile)
 
     recover_rate = float(len(lcs(recovered, ground_truth))) / float(len(ground_truth))
