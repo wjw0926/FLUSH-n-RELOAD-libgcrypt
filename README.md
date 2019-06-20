@@ -12,7 +12,7 @@ How to attack
 -------------
 The essential part of the attack is to specify the target addresses of security-critical operations. The target addresses in the target libgcrypt library can be obtained using GDB or <code>objdump</code>. Once the target addresses are specified, the attacker knows which address to trace during the attack. Sample target offsets are provided in offsets folder. Note that offsets for RSA are obtained from libgcrypt-1.5.2 configured with -O2 optimization and debug option and offsets for EdDSA are obtained from libgcrypt-1.8.4 configured with debug option.
 
-When the server is waiting for the client's request, you can start the attack by issuing <code>$ ./run.sh</code> on the client side. This will generate a result file which contains the number of cycles to access the specified target addresses. The results can be analyzed using analysis tools in analysis folder.
+When the server is waiting for the client's request, you can start the attack by issuing <code>$ ./run.sh</code> on the client side. This will generate a result file which contains the number of cycles to access the specified target addresses. The results can be analyzed using analysis tools in analyse folder.
 
 Author
 -------------
